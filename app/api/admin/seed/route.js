@@ -28,6 +28,13 @@ export async function POST(request) {
     return NextResponse.json({ ok: true, count: result.count });
   } catch (e) {
     console.error("POST /api/admin/seed failed:", e);
-    return NextResponse.json({ error: "seed_failed" }, { status: 500 });
+    // Detail is included in the response (not just server logs) because this
+    // route is already password-gated and we need it for one-time deploy
+    // troubleshooting — remove the `detail` field once seeding is confirmed
+    // working, so later 500s here don't leak internals unnecessarily.
+    return NextResponse.json(
+      { error: "seed_failed", detail: { message: e && e.message, code: e && e.code } },
+      { status: 500 }
+    );
   }
 }
